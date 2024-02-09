@@ -6,54 +6,70 @@ import twitter from '../../assets/twitter.png'
 import google from '../../assets/google.png'
 
 function App() {
-  const initialProfileData = {
+  const validate = (name, value) => {
+    let error = "";
+  
+    switch (name) {
+      case "email":
+        if (!value.includes("@")) {
+          error = "Email must include @";
+        }
+        break;
+      case "password":
+        let regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+        if (!regex.test(value)) {
+          error =
+            "Password must be at least 8 characters, including uppercase, lowercase and number";
+        }
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
+  const [profileDatas, setProfileDatas] = useState({
     email: '',
     password: '',
     remember: true
-  };
+  })
 
-  const validate = (name, value) => {
-    const validators = {
-      email: value => !value.includes("@") ? "Email must include @" : "",
-      password: value => /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/.test(value) ? "" : "Password must be at least 8 characters, including uppercase, lowercase, and number",
-    };
-    
-    return validators[name](value);
-  };
-  
-
-  const [profileDatas, setProfileDatas] = useState(initialProfileData);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    remember: true,
+  });
 
   const handleChange = (e) => {
+    e.preventDefault()
     const { name, type, checked, value } = e.target;
-    const inputValue = type === 'checkbox' ? checked : value;
 
     setProfileDatas({
       ...profileDatas,
-      [name]: inputValue
-    });
-
-    const error = validate(name, inputValue);
+      [name]: type === 'checkbox' ? checked : value
+    })
+    const error = validate(name, value)
     setErrors({
       ...errors,
       [name]: error
-    });
-  };
+    })
 
+  }
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const isFormValid = Object.values(profileDatas).every(value => value !== '');
+    e.preventDefault()
 
-    if (isFormValid) {
+    if (
+      profileDatas.email.length > 0 &&
+      profileDatas.password.length > 0 
+    ) {
       console.log(profileDatas);
     } else {
       console.log("Form is invalid");
     }
-  };
+  }
 
   return (
-    <form className="container" onSubmit={handleSubmit}>
+    <form className="container-1" onSubmit={handleSubmit}>
 
           <div className="sign" >
             <FontAwesomeIcon icon={faUser} /> 
@@ -61,17 +77,19 @@ function App() {
             <h2>X</h2>
           </div>
           <p>Login to your account - enjoy exclsuve features & many more</p>
+        
+      <br />
       <div>
         <label htmlFor="email">Email</label> 
         <br />
-        <input className="input" name="email" onChange={handleChange} />
+        <input className="input" placeholder="Enter your email" name="email" onChange={handleChange} />
         {errors.email && <p style={{color: 'red'}}>{errors.email}</p>}
       </div>
       <br />
       <div>
         <label htmlFor="password">Password</label>
         <br />
-        <input className="input" name="password" type="password" onChange={handleChange} />
+        <input className="input" placeholder="Enter your password" name="password" type="password" onChange={handleChange} />
         {errors.password && <p style={{color: 'red'}}>{errors.password}</p>}
       </div>
       <br />
@@ -84,8 +102,9 @@ function App() {
           onChange={handleChange}
         />
         <label htmlFor="remember">Remember me</label>
-        {errors.remember && <p style={{color: 'red'}}>{errors.remember}</p>}
         <a href="#">Forget Password?</a>
+
+        {errors.remember && <p style={{color: 'red'}}>{errors.remember}</p>}
       </div>
       <br/>
       <button className="submit" type="submit">Sign in</button>
